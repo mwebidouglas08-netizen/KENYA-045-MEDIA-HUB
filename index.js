@@ -1,22 +1,21 @@
 const express = require("express");
-const path = require("path");
 
 const app = express();
 
-app.use(express.json());
+// ✅ VERY IMPORTANT: respond immediately
+app.get("/", (req, res) => {
+  res.send("✅ KENYA045 MEDIA HUB LIVE");
+});
 
-// ✅ health check
+// ✅ health check (Railway uses this internally sometimes)
 app.get("/health", (req, res) => {
   res.send("OK");
 });
 
-// ✅ root test
-app.get("/", (req, res) => {
-  res.send("KENYA045 MEDIA HUB RUNNING");
-});
-
-// ✅ bookings
+// ✅ bookings (basic working API)
 let bookings = [];
+
+app.use(express.json());
 
 app.post("/api/book", (req, res) => {
   bookings.push(req.body);
@@ -27,20 +26,16 @@ app.get("/api/bookings", (req, res) => {
   res.json(bookings);
 });
 
-// ✅ serve frontend
-const clientPath = path.join(__dirname, "client/dist");
+// ✅ FORCE PORT (CRITICAL FIX)
+const PORT = process.env.PORT;
 
-app.use(express.static(clientPath));
+// ❗ HARD FAIL if port missing (debugging)
+if (!PORT) {
+  console.error("❌ PORT not provided by Railway");
+  process.exit(1);
+}
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientPath, "index.html"), (err) => {
-    if (err) res.send("Frontend not built");
-  });
-});
-
-// ✅ PORT FIX
-const PORT = process.env.PORT || 3000;
-
+// ✅ BIND CORRECTLY
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port", PORT);
 });
