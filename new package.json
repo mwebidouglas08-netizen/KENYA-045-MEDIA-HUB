@@ -1,0 +1,12 @@
+{
+  "name": "kenya045-mediahub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "cd client && npm install && npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
