@@ -3,38 +3,46 @@ try {
 } catch (e) {
   console.log("dotenv not found, skipping...");
 }
+
 const express = require("express");
 const path = require("path");
 
 const app = express();
+
+// IMPORTANT: allow Railway traffic
 app.use(express.json());
 
+// ✅ TEST ROUTE (VERY IMPORTANT)
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
+
+// ✅ Booking endpoint
 let bookings = [];
 
-// Admin login
-app.post("/api/admin/login", (req,res)=>{
-  const {username,password}=req.body;
-  if(username==="KENYA045 MEDIA HUB" && password==="@KENYA045 MEDIA HUB"){
-    return res.json({success:true});
-  }
-  res.status(401).json({success:false});
-});
-
-// Booking endpoint
-app.post("/api/book", (req,res)=>{
+app.post("/api/book", (req, res) => {
   bookings.push(req.body);
-  res.json({success:true,message:"Booking received"});
+  res.json({ success: true });
 });
 
-app.get("/api/bookings",(req,res)=>{
+app.get("/api/bookings", (req, res) => {
   res.json(bookings);
 });
 
-// Serve frontend
-app.use(express.static(path.join(__dirname,"../client/dist")));
-app.get("*",(req,res)=>{
-  res.sendFile(path.join(__dirname,"../client/dist/index.html"));
+// ✅ Serve frontend
+const clientPath = path.join(__dirname, "../client/dist");
+
+app.use(express.static(clientPath));
+
+// FIX: catch-all route MUST be last
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientPath, "index.html"));
 });
 
+// ✅ CRITICAL FIX FOR RAILWAY
 const PORT = process.env.PORT || 3000;
-app.listen(PORT,()=>console.log("Running on "+PORT));
+
+// VERY IMPORTANT: bind to 0.0.0.0
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port " + PORT);
+});
