@@ -9,40 +9,42 @@ const path = require("path");
 
 const app = express();
 
-// IMPORTANT: allow Railway traffic
 app.use(express.json());
 
-// ✅ TEST ROUTE (VERY IMPORTANT)
+// ✅ HEALTH CHECK (VERY IMPORTANT FOR RAILWAY)
 app.get("/health", (req, res) => {
-  res.send("OK");
+  res.status(200).send("OK");
 });
 
-// ✅ Booking endpoint
+// ✅ Booking system
 let bookings = [];
 
 app.post("/api/book", (req, res) => {
   bookings.push(req.body);
-  res.json({ success: true });
+  res.json({ success: true, message: "Booking received" });
 });
 
 app.get("/api/bookings", (req, res) => {
   res.json(bookings);
 });
 
-// ✅ Serve frontend
-const clientPath = path.join(__dirname, "../client/dist");
+// ✅ Serve frontend (SAFE VERSION)
+const clientPath = path.resolve(__dirname, "../client/dist");
 
 app.use(express.static(clientPath));
 
-// FIX: catch-all route MUST be last
+// ✅ FIX: fallback route MUST be correct
 app.get("*", (req, res) => {
-  res.sendFile(path.join(clientPath, "index.html"));
+  res.sendFile(path.join(clientPath, "index.html"), (err) => {
+    if (err) {
+      res.status(500).send("Frontend not built");
+    }
+  });
 });
 
-// ✅ CRITICAL FIX FOR RAILWAY
+// ✅ CRITICAL: Railway binding fix
 const PORT = process.env.PORT || 3000;
 
-// VERY IMPORTANT: bind to 0.0.0.0
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port " + PORT);
+  console.log(`Server running on port ${PORT}`);
 });
