@@ -3,51 +3,44 @@ const path = require("path");
 
 const app = express();
 
-// ✅ MIDDLEWARE
 app.use(express.json());
 
-// ✅ HEALTH CHECK (Railway needs this)
+// ✅ health check
 app.get("/health", (req, res) => {
-  res.status(200).send("OK");
+  res.send("OK");
 });
 
-// ✅ TEST ROOT (VERY IMPORTANT)
+// ✅ root test
 app.get("/", (req, res) => {
-  res.send("KENYA045 MEDIA HUB API RUNNING");
+  res.send("KENYA045 MEDIA HUB RUNNING");
 });
 
-// ✅ BOOKINGS
+// ✅ bookings
 let bookings = [];
 
 app.post("/api/book", (req, res) => {
   bookings.push(req.body);
-  res.json({ success: true, message: "Booking received" });
+  res.json({ success: true });
 });
 
 app.get("/api/bookings", (req, res) => {
   res.json(bookings);
 });
 
-// ✅ SERVE FRONTEND SAFELY
-const clientPath = path.resolve(__dirname, "../client/dist");
+// ✅ serve frontend
+const clientPath = path.join(__dirname, "client/dist");
 
 app.use(express.static(clientPath));
 
-// ⚠️ ONLY serve frontend IF it exists
 app.get("*", (req, res) => {
-  const indexFile = path.join(clientPath, "index.html");
-
-  res.sendFile(indexFile, (err) => {
-    if (err) {
-      res.send("Frontend not built yet");
-    }
+  res.sendFile(path.join(clientPath, "index.html"), (err) => {
+    if (err) res.send("Frontend not built");
   });
 });
 
-// ✅ RAILWAY PORT FIX
+// ✅ PORT FIX
 const PORT = process.env.PORT || 3000;
 
-// 🔥 IMPORTANT: bind to all interfaces
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
