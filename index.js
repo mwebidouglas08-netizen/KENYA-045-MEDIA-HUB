@@ -2,40 +2,29 @@ const express = require("express");
 
 const app = express();
 
-// ✅ VERY IMPORTANT: respond immediately
-app.get("/", (req, res) => {
-  res.send("✅ KENYA045 MEDIA HUB LIVE");
-});
-
-// ✅ health check (Railway uses this internally sometimes)
-app.get("/health", (req, res) => {
-  res.send("OK");
-});
-
-// ✅ bookings (basic working API)
-let bookings = [];
-
+// ✅ middleware
 app.use(express.json());
 
+// ✅ test route
+app.get("/", (req, res) => {
+  res.send("🚀 KENYA045 MEDIA HUB SERVER IS LIVE");
+});
+
+// ✅ health check (important for Railway)
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
+// ✅ booking route
 app.post("/api/book", (req, res) => {
-  bookings.push(req.body);
-  res.json({ success: true });
+  console.log("📩 Booking received:", req.body);
+  res.json({ success: true, message: "Booking received" });
 });
 
-app.get("/api/bookings", (req, res) => {
-  res.json(bookings);
-});
+// ❗ CRITICAL LINE (DO NOT CHANGE)
+const PORT = process.env.PORT || 3000;
 
-// ✅ FORCE PORT (CRITICAL FIX)
-const PORT = process.env.PORT;
-
-// ❗ HARD FAIL if port missing (debugging)
-if (!PORT) {
-  console.error("❌ PORT not provided by Railway");
-  process.exit(1);
-}
-
-// ✅ BIND CORRECTLY
+// ❗ CRITICAL: bind to 0.0.0.0
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("🚀 Server running on port", PORT);
+  console.log(`✅ Server running on port ${PORT}`);
 });
