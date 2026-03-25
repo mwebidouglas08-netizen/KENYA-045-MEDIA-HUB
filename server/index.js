@@ -1,22 +1,22 @@
-try {
-  require("dotenv").config();
-} catch (e) {
-  console.log("dotenv not found, skipping...");
-}
-
 const express = require("express");
 const path = require("path");
 
 const app = express();
 
+// ✅ MIDDLEWARE
 app.use(express.json());
 
-// ✅ HEALTH CHECK (VERY IMPORTANT FOR RAILWAY)
+// ✅ HEALTH CHECK (Railway needs this)
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-// ✅ Booking system
+// ✅ TEST ROOT (VERY IMPORTANT)
+app.get("/", (req, res) => {
+  res.send("KENYA045 MEDIA HUB API RUNNING");
+});
+
+// ✅ BOOKINGS
 let bookings = [];
 
 app.post("/api/book", (req, res) => {
@@ -28,23 +28,26 @@ app.get("/api/bookings", (req, res) => {
   res.json(bookings);
 });
 
-// ✅ Serve frontend (SAFE VERSION)
+// ✅ SERVE FRONTEND SAFELY
 const clientPath = path.resolve(__dirname, "../client/dist");
 
 app.use(express.static(clientPath));
 
-// ✅ FIX: fallback route MUST be correct
+// ⚠️ ONLY serve frontend IF it exists
 app.get("*", (req, res) => {
-  res.sendFile(path.join(clientPath, "index.html"), (err) => {
+  const indexFile = path.join(clientPath, "index.html");
+
+  res.sendFile(indexFile, (err) => {
     if (err) {
-      res.status(500).send("Frontend not built");
+      res.send("Frontend not built yet");
     }
   });
 });
 
-// ✅ CRITICAL: Railway binding fix
+// ✅ RAILWAY PORT FIX
 const PORT = process.env.PORT || 3000;
 
+// 🔥 IMPORTANT: bind to all interfaces
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
