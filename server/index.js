@@ -1,5 +1,8 @@
-
-require("dotenv").config();
+try {
+  require("dotenv").config();
+} catch (e) {
+  console.log("dotenv not found, skipping...");
+}
 const express = require("express");
 const path = require("path");
 
